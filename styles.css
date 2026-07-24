@@ -63,7 +63,7 @@ body {
   padding: 12px 24px;
   background: rgba(12, 9, 22, 0.92);
   border-bottom: 1px solid var(--border-amber);
-  z-index: 10;
+  z-index: 30;
 }
 
 .header-title {
@@ -125,7 +125,7 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   Room Viewport (3D Render Image + Interactive SVG Overlay)
+   Room Viewport (3D Render Image + HTML Absolute Hotspots Overlay)
    -------------------------------------------------------------------------- */
 #room-viewport {
   flex: 1;
@@ -150,49 +150,95 @@ body {
   display: block;
 }
 
-#room-svg {
+/* 핫스팟 인터랙션 레이어 */
+#hotspot-layer {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 5;
+  z-index: 10;
+  pointer-events: none;
 }
 
-.hotspot-group3d {
-  transition: all 0.25s ease;
+.hotspot-area {
+  position: absolute;
+  pointer-events: auto;
   cursor: pointer;
-  pointer-events: all;
-}
-
-.hotspot-highlight {
-  stroke: rgba(251, 191, 36, 0);
-  stroke-width: 3px;
-  fill: rgba(0, 0, 0, 0.001);
-  pointer-events: all;
+  border: 2px dashed rgba(251, 191, 36, 0);
+  border-radius: 8px;
   transition: all 0.25s ease;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 8px;
 }
 
-.hotspot-group3d:hover .hotspot-highlight {
-  fill: rgba(251, 191, 36, 0.25) !important;
-  stroke: rgba(251, 191, 36, 0.95) !important;
-  filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.8));
+.hotspot-area:hover {
+  background: rgba(251, 191, 36, 0.22);
+  border-color: rgba(251, 191, 36, 0.95);
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.6);
 }
 
-.hotspot-label {
-  fill: #fff;
+.hotspot-badge {
+  background: rgba(15, 12, 27, 0.9);
+  border: 1px solid var(--accent-gold);
+  color: #fff;
   font-family: 'Noto Serif KR', serif;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: bold;
-  text-anchor: middle;
+  padding: 4px 10px;
+  border-radius: 12px;
   opacity: 0;
   transition: opacity 0.25s ease;
   pointer-events: none;
-  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.9));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
 }
 
-.hotspot-group3d:hover .hotspot-label {
+.hotspot-area:hover .hotspot-badge {
   opacity: 1;
+}
+
+/* 핫스팟 개별 위치 지정 */
+#hotspot-door { top: 10%; left: 2%; width: 19%; height: 76%; }
+#hotspot-clock { top: 12%; left: 23%; width: 11%; height: 28%; }
+#hotspot-frames { top: 10%; left: 35%; width: 29%; height: 20%; }
+#hotspot-safe { top: 33%; left: 51%; width: 14%; height: 20%; }
+#hotspot-desk { top: 53%; left: 23%; width: 45%; height: 35%; }
+#hotspot-bookshelf { top: 10%; left: 68%; width: 30%; height: 76%; }
+
+/* UV 오버레이 */
+.uv-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #4c1d95;
+  mix-blend-mode: color-dodge;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+  z-index: 15;
+}
+
+.uv-secret-box {
+  position: absolute;
+  top: 56%;
+  left: 36%;
+  transform: translate(-50%, -50%);
+  background: rgba(6, 78, 59, 0.95);
+  border: 2px solid #34d399;
+  color: #6ee7b7;
+  font-family: 'Cinzel', serif;
+  font-size: 20px;
+  font-weight: 900;
+  padding: 8px 18px;
+  border-radius: 8px;
+  box-shadow: 0 0 25px #34d399;
+  z-index: 20;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
 }
 
 /* --------------------------------------------------------------------------
@@ -205,7 +251,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  z-index: 10;
+  z-index: 30;
 }
 
 .inventory-header {

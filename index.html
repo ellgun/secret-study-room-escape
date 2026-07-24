@@ -36,71 +36,33 @@
         <!-- 고품질 3D 렌더링 서재 배경 이미지 -->
         <img id="room-bg-image" src="secret_study_room.jpg" alt="3D Secret Study Room">
 
-        <!-- 핫스팟 레이어 (SVG Overlay) -->
-        <svg id="room-svg" viewBox="0 0 1000 600" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <radialGradient id="spot-light" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.3"/>
-              <stop offset="100%" stop-color="#fbbf24" stop-opacity="0"/>
-            </radialGradient>
+        <!-- 3D 핫스팟 레이어 (HTML Absolute Hotspot Overlays) -->
+        <div id="hotspot-layer">
+          <div id="hotspot-door" class="hotspot-area">
+            <span class="hotspot-badge">🚪 탈출 문</span>
+          </div>
+          <div id="hotspot-clock" class="hotspot-area">
+            <span class="hotspot-badge">🕰️ 괘종시계</span>
+          </div>
+          <div id="hotspot-frames" class="hotspot-area">
+            <span class="hotspot-badge">🖼️ 삐뚤어진 액자들</span>
+          </div>
+          <div id="hotspot-safe" class="hotspot-area">
+            <span class="hotspot-badge">🔐 비밀 금고</span>
+          </div>
+          <div id="hotspot-desk" class="hotspot-area">
+            <span class="hotspot-badge">🛋️ 앤틱 책상</span>
+          </div>
+          <div id="hotspot-bookshelf" class="hotspot-area">
+            <span class="hotspot-badge">📚 마법의 책장</span>
+          </div>
+        </div>
 
-            <filter id="glow">
-              <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
-              <feMerge>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-          </defs>
-
-          <!-- 1. 탈출 문 (Exit Door Hotspot) -->
-          <g id="hotspot-door" class="hotspot-group3d" cursor="pointer">
-            <polygon points="20,70 210,70 210,520 20,520" fill="rgba(0,0,0,0.001)" pointer-events="all" class="hotspot-highlight"/>
-            <text x="115" y="55" class="hotspot-label">🚪 탈출 문</text>
-          </g>
-
-          <!-- 2. 벽면 괘종시계 (Wall Clock Hotspot) -->
-          <g id="hotspot-clock" class="hotspot-group3d" cursor="pointer">
-            <circle cx="280" cy="170" r="60" fill="rgba(0,0,0,0.001)" pointer-events="all" class="hotspot-highlight"/>
-            <text x="280" y="90" class="hotspot-label">🕰️ 괘종시계</text>
-          </g>
-
-          <!-- 3. 벽면 액자 3개 (Frames Hotspot) -->
-          <g id="hotspot-frames" class="hotspot-group3d" cursor="pointer">
-            <rect x="360" y="60" width="280" height="130" rx="8" fill="rgba(0,0,0,0.001)" pointer-events="all" class="hotspot-highlight"/>
-            <text x="500" y="48" class="hotspot-label">🖼️ 삐뚤어진 액자들</text>
-          </g>
-
-          <!-- 4. 비밀 금고 (Safe Hotspot) -->
-          <g id="hotspot-safe" class="hotspot-group3d" cursor="pointer">
-            <rect x="510" y="200" width="140" height="120" rx="8" fill="rgba(0,0,0,0.001)" pointer-events="all" class="hotspot-highlight"/>
-            <text x="580" y="185" class="hotspot-label">🔐 비밀 금고</text>
-          </g>
-
-          <!-- 5. 앤틱 책상 (Desk Hotspot) -->
-          <g id="hotspot-desk" class="hotspot-group3d" cursor="pointer">
-            <polygon points="240,320 680,320 700,530 220,530" fill="rgba(0,0,0,0.001)" pointer-events="all" class="hotspot-highlight"/>
-            <text x="460" y="310" class="hotspot-label">🛋️ 앤틱 책상</text>
-          </g>
-
-          <!-- 6. 서재 책장 (Bookshelf Hotspot) -->
-          <g id="hotspot-bookshelf" class="hotspot-group3d" cursor="pointer">
-            <rect x="680" y="70" width="300" height="460" rx="8" fill="rgba(0,0,0,0.001)" pointer-events="all" class="hotspot-highlight"/>
-            <text x="830" y="55" class="hotspot-label">📚 마법의 책장</text>
-          </g>
-
-          <!-- 3D 앰비언트 다크 조명 오버레이 -->
-          <rect width="1000" height="600" fill="rgba(10, 8, 16, 0.2)" pointer-events="none"/>
-
-          <!-- UV 손전등 발광 오버레이 (3D 모드) -->
-          <rect id="uv-overlay" width="1000" height="600" fill="#4c1d95" opacity="0" pointer-events="none" style="transition: opacity 0.5s ease; mix-blend-mode: color-dodge;"/>
-          
-          <!-- UV 손전등 비출 때 보이는 3D 야광 암호 문양 -->
-          <g id="uv-secret-text" opacity="0" style="transition: opacity 0.5s ease; pointer-events: none;">
-            <rect x="360" y="325" width="270" height="40" rx="6" fill="rgba(6, 78, 59, 0.85)" stroke="#34d399" stroke-width="2"/>
-            <text x="495" y="352" fill="#6ee7b7" font-family="'Cinzel', serif" font-size="20" font-weight="900" text-anchor="middle" filter="url(#glow)">⚡ [ UV CODE: 7 3 9 4 ] ⚡</text>
-          </g>
-        </svg>
+        <!-- UV 라이트 효과 및 야광 암호 레이어 -->
+        <div id="uv-overlay" class="uv-layer"></div>
+        <div id="uv-secret-badge" class="uv-secret-box hidden">
+          <span>⚡ [ UV CODE: 7 3 9 4 ] ⚡</span>
+        </div>
       </div>
     </main>
 

@@ -64,7 +64,7 @@ class GameController {
       }
     });
 
-    // 2. 3D 핫스팟 클릭 이벤트
+    // 2. 3D 핫스팟 영역 클릭 이벤트
     document.getElementById('hotspot-door').addEventListener('click', () => {
       window.soundEngine.playClick();
       this.openModal('modal-door');
@@ -258,14 +258,14 @@ class GameController {
   toggleUvLight(active) {
     this.uvActive = active;
     const uvOverlay = document.getElementById('uv-overlay');
-    const uvText = document.getElementById('uv-secret-text');
+    const uvSecretBadge = document.getElementById('uv-secret-badge');
 
     if (active) {
-      uvOverlay.style.opacity = '0.85';
-      uvText.style.opacity = '1';
+      if (uvOverlay) uvOverlay.style.opacity = '0.85';
+      if (uvSecretBadge) uvSecretBadge.classList.remove('hidden');
     } else {
-      uvOverlay.style.opacity = '0';
-      uvText.style.opacity = '0';
+      if (uvOverlay) uvOverlay.style.opacity = '0';
+      if (uvSecretBadge) uvSecretBadge.classList.add('hidden');
     }
   }
 
