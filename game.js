@@ -16,7 +16,9 @@ class GameController {
     this.setupEventListeners();
     this.startTimer();
     this.renderInventory();
-    window.soundEngine.startBgm();
+    if (window.soundEngine) {
+      try { window.soundEngine.startBgm(); } catch(e) {}
+    }
   }
 
   startTimer() {
@@ -44,93 +46,126 @@ class GameController {
     }
   }
 
+  playSound(method) {
+    if (window.soundEngine && typeof window.soundEngine[method] === 'function') {
+      try { window.soundEngine[method](); } catch(e) {}
+    }
+  }
+
   // ------------------------------------------------------------------------
-  // 이벤트 리스너 설정
+  // 핫스팟 클릭 핸들러 (인라인 & 이벤트 리스너 통합)
   // ------------------------------------------------------------------------
+  handleHotspot(name) {
+    this.playSound('playClick');
+    switch (name) {
+      case 'door':
+        this.openModal('modal-door');
+        break;
+      case 'clock':
+        alert('🕰️ 앤틱 괘종시계: 시계 바늘이 9시 15분을 가리키고 있습니다.');
+        break;
+      case 'frames':
+        this.openModal('modal-frames');
+        break;
+      case 'bookshelf':
+        this.openModal('modal-bookshelf');
+        break;
+      case 'desk':
+        this.openModal('modal-desk');
+        break;
+      case 'safe':
+        this.openModal('modal-safe');
+        break;
+    }
+  }
+
   setupEventListeners() {
     // 1. 헤더 버튼들
-    document.getElementById('btn-sound').addEventListener('click', () => {
-      const enabled = window.soundEngine.toggleSound();
-      document.getElementById('btn-sound').innerText = enabled ? '🔊 소리 ON' : '🔇 소리 OFF';
-    });
+    const btnSound = document.getElementById('btn-sound');
+    if (btnSound) {
+      btnSound.addEventListener('click', () => {
+        let enabled = true;
+        if (window.soundEngine) {
+          enabled = window.soundEngine.toggleSound();
+        }
+        btnSound.innerText = enabled ? '🔊 소리 ON' : '🔇 소리 OFF';
+      });
+    }
 
-    document.getElementById('btn-hint').addEventListener('click', () => {
-      this.openHintModal();
-    });
+    const btnHint = document.getElementById('btn-hint');
+    if (btnHint) {
+      btnHint.addEventListener('click', () => this.openHintModal());
+    }
 
-    document.getElementById('btn-restart').addEventListener('click', () => {
-      if (confirm('처음부터 다시 시작하시겠습니까? (진행 상황이 초기화됩니다)')) {
-        location.reload();
+    const btnRestart = document.getElementById('btn-restart');
+    if (btnRestart) {
+      btnRestart.addEventListener('click', () => {
+        if (confirm('처음부터 다시 시작하시겠습니까? (진행 상황이 초기화됩니다)')) {
+          location.reload();
+        }
+      });
+    }
+
+    // 2. 핫스팟 바인딩
+    ['door', 'clock', 'frames', 'bookshelf', 'desk', 'safe'].forEach(spot => {
+      const el = document.getElementById(`hotspot-${spot}`);
+      if (el) {
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.handleHotspot(spot);
+        });
       }
     });
 
-    // 2. 3D 핫스팟 영역 클릭 이벤트
-    document.getElementById('hotspot-door').addEventListener('click', () => {
-      window.soundEngine.playClick();
-      this.openModal('modal-door');
-    });
-
-    document.getElementById('hotspot-clock').addEventListener('click', () => {
-      window.soundEngine.playClick();
-      alert('🕰️ 앤틱 괘종시계: 시계 바늘이 9시 15분을 가리키고 있습니다.');
-    });
-
-    document.getElementById('hotspot-frames').addEventListener('click', () => {
-      window.soundEngine.playClick();
-      this.openModal('modal-frames');
-    });
-
-    document.getElementById('hotspot-bookshelf').addEventListener('click', () => {
-      window.soundEngine.playClick();
-      this.openModal('modal-bookshelf');
-    });
-
-    document.getElementById('hotspot-desk').addEventListener('click', () => {
-      window.soundEngine.playClick();
-      this.openModal('modal-desk');
-    });
-
-    document.getElementById('hotspot-safe').addEventListener('click', () => {
-      window.soundEngine.playClick();
-      this.openModal('modal-safe');
-    });
-
-    // 3. 모달 닫기 버튼들
+    // 3. 모달 닫기
     document.querySelectorAll('.modal-close').forEach(btn => {
       btn.addEventListener('click', () => this.closeModal());
     });
 
-    // 배경 클릭 시 모달 닫기
-    document.getElementById('modal-overlay').addEventListener('click', (e) => {
-      if (e.target.id === 'modal-overlay') {
-        this.closeModal();
-      }
-    });
+    const overlay = document.getElementById('modal-overlay');
+    if (overlay) {
+      overlay.addEventListener('click', (e) => {
+        if (e.target.id === 'modal-overlay') {
+          this.closeModal();
+        }
+      });
+    }
 
-    // 4. 퍼즐 연동 이벤트 핸들러
-    // 액자 퍼즐
+    // 4. 퍼즐 이벤트 핸들러
     [1, 2, 3].forEach(idx => {
       const frameEl = document.getElementById(`interactive-frame-${idx}`);
       if (frameEl) {
         frameEl.addEventListener('click', () => this.puzzleManager.rotateFrame(idx));
       }
     });
-    document.getElementById('btn-check-frames').addEventListener('click', () => this.puzzleManager.checkFrames());
 
-    // 책장 퍼즐
+    const btnCheckFrames = document.getElementById('btn-check-frames');
+    if (btnCheckFrames) {
+      btnCheckFrames.addEventListener('click', () => this.puzzleManager.checkFrames());
+    }
+
     document.querySelectorAll('.color-book').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const color = e.target.getAttribute('data-color');
         this.puzzleManager.pressBook(color);
       });
     });
-    document.getElementById('btn-reset-books').addEventListener('click', () => this.puzzleManager.resetBooks());
 
-    // 책상 서랍
-    document.getElementById('btn-unlock-drawer1').addEventListener('click', () => this.puzzleManager.unlockDrawer1());
-    document.getElementById('btn-take-uvlight').addEventListener('click', () => this.puzzleManager.takeUvLight());
+    const btnResetBooks = document.getElementById('btn-reset-books');
+    if (btnResetBooks) {
+      btnResetBooks.addEventListener('click', () => this.puzzleManager.resetBooks());
+    }
 
-    // 금고 키패드
+    const btnUnlockDrawer1 = document.getElementById('btn-unlock-drawer1');
+    if (btnUnlockDrawer1) {
+      btnUnlockDrawer1.addEventListener('click', () => this.puzzleManager.unlockDrawer1());
+    }
+
+    const btnTakeUv = document.getElementById('btn-take-uvlight');
+    if (btnTakeUv) {
+      btnTakeUv.addEventListener('click', () => this.puzzleManager.takeUvLight());
+    }
+
     document.querySelectorAll('.key-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const key = e.target.getAttribute('data-key');
@@ -138,15 +173,25 @@ class GameController {
       });
     });
 
-    // 최종 문 열기
-    document.getElementById('btn-use-masterkey').addEventListener('click', () => this.puzzleManager.unlockDoor());
+    const btnUseMasterkey = document.getElementById('btn-use-masterkey');
+    if (btnUseMasterkey) {
+      btnUseMasterkey.addEventListener('click', () => this.puzzleManager.unlockDoor());
+    }
 
-    // 인벤토리 액션 버튼
-    document.getElementById('btn-inspect').addEventListener('click', () => this.inspectSelectedItem());
-    document.getElementById('btn-combine').addEventListener('click', () => this.combineSelectedItem());
+    const btnInspect = document.getElementById('btn-inspect');
+    if (btnInspect) {
+      btnInspect.addEventListener('click', () => this.inspectSelectedItem());
+    }
 
-    // 재도전 버튼
-    document.getElementById('btn-play-again').addEventListener('click', () => location.reload());
+    const btnCombine = document.getElementById('btn-combine');
+    if (btnCombine) {
+      btnCombine.addEventListener('click', () => this.combineSelectedItem());
+    }
+
+    const btnPlayAgain = document.getElementById('btn-play-again');
+    if (btnPlayAgain) {
+      btnPlayAgain.addEventListener('click', () => location.reload());
+    }
   }
 
   // ------------------------------------------------------------------------
@@ -154,7 +199,7 @@ class GameController {
   // ------------------------------------------------------------------------
   openModal(modalId) {
     const overlay = document.getElementById('modal-overlay');
-    overlay.classList.remove('hidden');
+    if (overlay) overlay.classList.remove('hidden');
 
     document.querySelectorAll('.modal-content').forEach(m => m.classList.add('hidden'));
 
@@ -166,7 +211,7 @@ class GameController {
 
   closeModal() {
     const overlay = document.getElementById('modal-overlay');
-    overlay.classList.add('hidden');
+    if (overlay) overlay.classList.add('hidden');
     document.querySelectorAll('.modal-content').forEach(m => m.classList.add('hidden'));
   }
 
@@ -195,6 +240,7 @@ class GameController {
 
   renderInventory() {
     const slotsContainer = document.getElementById('inventory-slots');
+    if (!slotsContainer) return;
     const slots = slotsContainer.querySelectorAll('.slot');
 
     slots.forEach((slot, index) => {
@@ -224,21 +270,20 @@ class GameController {
       }
     });
 
-    // 상세보기/조합 버튼 활성화 상태 업데이트
     const inspectBtn = document.getElementById('btn-inspect');
     const combineBtn = document.getElementById('btn-combine');
 
     if (this.selectedItemIndex !== null && this.inventory[this.selectedItemIndex]) {
-      inspectBtn.disabled = false;
-      combineBtn.disabled = false;
+      if (inspectBtn) inspectBtn.disabled = false;
+      if (combineBtn) combineBtn.disabled = false;
     } else {
-      inspectBtn.disabled = true;
-      combineBtn.disabled = true;
+      if (inspectBtn) inspectBtn.disabled = true;
+      if (combineBtn) combineBtn.disabled = true;
     }
   }
 
   selectSlot(index) {
-    window.soundEngine.playClick();
+    this.playSound('playClick');
     if (this.selectedItemIndex === index) {
       this.selectedItemIndex = null;
     } else {
@@ -246,7 +291,6 @@ class GameController {
     }
     this.renderInventory();
 
-    // 선택된 아이템이 UV 손전등인지 확인
     const selectedItem = this.inventory[this.selectedItemIndex];
     if (selectedItem && selectedItem.id === 'uv_flashlight') {
       this.toggleUvLight(true);
@@ -274,17 +318,21 @@ class GameController {
     const item = this.inventory[this.selectedItemIndex];
     if (!item) return;
 
-    window.soundEngine.playClick();
-    document.getElementById('inspect-title').innerText = item.name;
+    this.playSound('playClick');
+    const inspectTitle = document.getElementById('inspect-title');
+    if (inspectTitle) inspectTitle.innerText = item.name;
 
     const iconContainer = document.getElementById('inspect-icon');
-    if (item.image) {
-      iconContainer.innerHTML = `<img class="inspect-3d-img" src="${item.image}" alt="${item.name}">`;
-    } else {
-      iconContainer.innerText = item.icon;
+    if (iconContainer) {
+      if (item.image) {
+        iconContainer.innerHTML = `<img class="inspect-3d-img" src="${item.image}" alt="${item.name}">`;
+      } else {
+        iconContainer.innerText = item.icon;
+      }
     }
 
-    document.getElementById('inspect-description').innerText = item.desc;
+    const inspectDesc = document.getElementById('inspect-description');
+    if (inspectDesc) inspectDesc.innerText = item.desc;
 
     this.openModal('modal-item-detail');
   }
@@ -298,7 +346,7 @@ class GameController {
         this.removeItem('battery');
         this.removeItem('uv_body');
 
-        window.soundEngine.playSuccess();
+        this.playSound('playSuccess');
         this.addItem({
           id: 'uv_flashlight',
           name: '3D UV 손전등',
@@ -309,21 +357,19 @@ class GameController {
 
         alert('⚡ [건전지 🔋]와 [UV 라이트 본체 🔦]를 조합하여 [3D UV 손전등 🔦✨]을 완성했습니다!');
       } else {
-        window.soundEngine.playError();
+        this.playSound('playError');
         alert('💡 이 아이템을 조합하려면 [건전지]와 [UV 라이트 본체]가 모두 필요합니다.');
       }
     } else {
-      window.soundEngine.playError();
+      this.playSound('playError');
       alert('조합할 수 없는 아이템입니다.');
     }
   }
 
-  // ------------------------------------------------------------------------
-  // 힌트 시스템
-  // ------------------------------------------------------------------------
   openHintModal() {
-    window.soundEngine.playClick();
+    this.playSound('playClick');
     const hintList = document.getElementById('hint-list');
+    if (!hintList) return;
     hintList.innerHTML = '';
 
     const hints = [];
@@ -367,9 +413,6 @@ class GameController {
     this.openModal('modal-hint');
   }
 
-  // ------------------------------------------------------------------------
-  // 탈출 성공
-  // ------------------------------------------------------------------------
   triggerVictory() {
     this.stopTimer();
 
@@ -377,7 +420,8 @@ class GameController {
     const secs = String(this.secondsElapsed % 60).padStart(2, '0');
     const timeStr = `${mins}분 ${secs}초`;
 
-    document.getElementById('final-time').innerText = timeStr;
+    const finalTime = document.getElementById('final-time');
+    if (finalTime) finalTime.innerText = timeStr;
 
     let rank = '전설의 탈출가';
     if (this.secondsElapsed < 120) {
@@ -387,7 +431,9 @@ class GameController {
     } else {
       rank = '🗝️ 집념의 서재 탐험가';
     }
-    document.getElementById('final-rank').innerText = rank;
+
+    const finalRank = document.getElementById('final-rank');
+    if (finalRank) finalRank.innerText = rank;
 
     this.openModal('modal-clear');
   }

@@ -7,11 +7,7 @@ class PuzzleManager {
     this.game = game;
 
     // 퍼즐 1: 액자 정렬 상태
-    this.frameAngles = {
-      1: -15,
-      2: 25,
-      3: -30
-    };
+    this.frameAngles = { 1: -15, 2: 25, 3: -30 };
     this.framesSolved = false;
 
     // 퍼즐 2: 책 순서 상태
@@ -30,6 +26,14 @@ class PuzzleManager {
 
     // 퍼즐 5: 문 해금
     this.doorUnlocked = false;
+  }
+
+  playSound(method) {
+    if (window.soundEngine && typeof window.soundEngine[method] === 'function') {
+      try {
+        window.soundEngine[method]();
+      } catch (e) {}
+    }
   }
 
   reset() {
@@ -53,14 +57,12 @@ class PuzzleManager {
   // ------------------------------------------------------------------------
   rotateFrame(frameIndex) {
     if (this.framesSolved) return;
-    window.soundEngine.playClick();
-    
-    // 15도씩 회전하며, -180 ~ 180범위 순환
+    this.playSound('playClick');
+
     let angle = this.frameAngles[frameIndex] + 15;
     if (angle > 180) angle = -165;
     this.frameAngles[frameIndex] = angle;
 
-    // UI 업데이트
     const frameEl = document.querySelector(`#interactive-frame-${frameIndex} .frame-box`);
     const statusEl = document.querySelector(`#interactive-frame-${frameIndex} .frame-status`);
     if (frameEl && statusEl) {
@@ -79,15 +81,14 @@ class PuzzleManager {
 
   checkFrames() {
     if (this.framesSolved) {
-      this.game.showMessage('이미 액자 퍼즐을 풀었습니다.');
+      alert('이미 액자 퍼즐을 풀었습니다.');
       return;
     }
 
     if (this.frameAngles[1] === 0 && this.frameAngles[2] === 0 && this.frameAngles[3] === 0) {
       this.framesSolved = true;
-      window.soundEngine.playSuccess();
+      this.playSound('playSuccess');
 
-      // 보상 아이템: 건전지 획득
       this.game.addItem({
         id: 'battery',
         name: '건전지',
@@ -98,7 +99,7 @@ class PuzzleManager {
       alert('🎉 액자가 바르게 정렬되면서 뒤에서 [건전지 🔋]를 발견하고 인벤토리에 추가했습니다!');
       this.game.closeModal();
     } else {
-      window.soundEngine.playError();
+      this.playSound('playError');
       alert('❌ 액자 정렬이 바르지 않습니다. 모든 액자가 직각(0도)이 되도록 맞추세요!');
     }
   }
@@ -108,23 +109,22 @@ class PuzzleManager {
   // ------------------------------------------------------------------------
   pressBook(color) {
     if (this.bookshelfSolved) return;
-    window.soundEngine.playClick();
+    this.playSound('playClick');
 
     this.currentBookSequence.push(color);
-    
-    // 입력 화면 업데이트
+
     const seqTextEl = document.getElementById('seq-text');
     const colorNames = { red: '빨강', blue: '파랑', green: '초록', yellow: '노랑', purple: '보라' };
-    seqTextEl.innerText = this.currentBookSequence.map(c => colorNames[c] || c).join(' -> ');
+    if (seqTextEl) {
+      seqTextEl.innerText = this.currentBookSequence.map(c => colorNames[c] || c).join(' -> ');
+    }
 
-    // 4개 입력 완료 시 체크
     if (this.currentBookSequence.length === this.bookTargetSequence.length) {
       const isCorrect = this.currentBookSequence.every((val, index) => val === this.bookTargetSequence[index]);
       if (isCorrect) {
         this.bookshelfSolved = true;
-        window.soundEngine.playSuccess();
+        this.playSound('playSuccess');
 
-        // 보상 아이템: 작은 열쇠 획득
         this.game.addItem({
           id: 'small_key',
           name: '작은 열쇠',
@@ -135,7 +135,7 @@ class PuzzleManager {
         alert('🎉 비밀 장치가 작동하며 책장 뒤에서 [작은 열쇠 🗝️]가 튀어나왔습니다!');
         this.game.closeModal();
       } else {
-        window.soundEngine.playError();
+        this.playSound('playError');
         alert('❌ 책 순서가 잘못되어 비밀 장치가 초기화되었습니다.');
         this.resetBooks();
       }
@@ -156,12 +156,14 @@ class PuzzleManager {
 
     if (this.game.hasItem('small_key')) {
       this.drawer1Unlocked = true;
-      window.soundEngine.playUnlock();
+      this.playSound('playUnlock');
 
-      document.getElementById('btn-unlock-drawer1').classList.add('hidden');
-      document.getElementById('drawer1-content').classList.remove('hidden');
+      const btnUnlock = document.getElementById('btn-unlock-drawer1');
+      const drawer1Content = document.getElementById('drawer1-content');
+      if (btnUnlock) btnUnlock.classList.add('hidden');
+      if (drawer1Content) drawer1Content.classList.remove('hidden');
     } else {
-      window.soundEngine.playError();
+      this.playSound('playError');
       alert('🔒 열쇠가 없습니다! 서랍 1을 열 수 있는 열쇠를 찾아보세요.');
     }
   }
@@ -169,7 +171,7 @@ class PuzzleManager {
   takeUvLight() {
     if (this.uvLightTaken) return;
     this.uvLightTaken = true;
-    window.soundEngine.playItemPick();
+    this.playSound('playItemPick');
 
     this.game.addItem({
       id: 'uv_body',
@@ -178,7 +180,10 @@ class PuzzleManager {
       desc: '자외선(UV) 전구가 장착된 손전등 본체입니다. 작동시키려면 건전지가 필요합니다.'
     });
 
-    document.getElementById('drawer1-content').innerHTML = '<p class="text-muted">서랍 안이 비어있습니다.</p>';
+    const drawer1Content = document.getElementById('drawer1-content');
+    if (drawer1Content) {
+      drawer1Content.innerHTML = '<p class="text-muted">서랍 안이 비어있습니다.</p>';
+    }
     alert('🎉 [UV 라이트 본체 🔦]를 인벤토리에 추가했습니다!');
   }
 
@@ -187,7 +192,7 @@ class PuzzleManager {
   // ------------------------------------------------------------------------
   pressSafeKey(key) {
     if (this.safeSolved) return;
-    window.soundEngine.playClick();
+    this.playSound('playClick');
 
     if (key === 'C') {
       this.currentSafeCode = '';
@@ -215,9 +220,8 @@ class PuzzleManager {
   checkSafeCode() {
     if (this.currentSafeCode === this.safeTargetCode) {
       this.safeSolved = true;
-      window.soundEngine.playSuccess();
+      this.playSound('playSuccess');
 
-      // 보상 아이템: 마스터 키 획득 (3D 이미지 연동)
       this.game.addItem({
         id: 'master_key',
         name: '3D 마스터 키',
@@ -229,7 +233,7 @@ class PuzzleManager {
       alert('🎉 찰칵! 금고가 열리며 [3D 마스터 키 🔑]를 발견했습니다!');
       this.game.closeModal();
     } else {
-      window.soundEngine.playError();
+      this.playSound('playError');
       alert('❌ 금고 암호가 올바르지 않습니다.');
       this.currentSafeCode = '';
       this.updateSafeDisplay();
@@ -242,13 +246,13 @@ class PuzzleManager {
   unlockDoor() {
     if (this.game.hasItem('master_key')) {
       this.doorUnlocked = true;
-      window.soundEngine.playSuccess();
-      window.soundEngine.playUnlock();
+      this.playSound('playSuccess');
+      this.playSound('playUnlock');
 
       this.game.closeModal();
       this.game.triggerVictory();
     } else {
-      window.soundEngine.playError();
+      this.playSound('playError');
       alert('🔒 마스터 키가 없습니다. 서재 안의 금고에서 마스터 키를 찾아야 합니다!');
     }
   }

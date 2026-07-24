@@ -38,22 +38,22 @@
 
         <!-- 3D 핫스팟 레이어 (HTML Absolute Hotspot Overlays) -->
         <div id="hotspot-layer">
-          <div id="hotspot-door" class="hotspot-area">
+          <div id="hotspot-door" class="hotspot-area" onclick="window.game && window.game.handleHotspot('door')">
             <span class="hotspot-badge">🚪 탈출 문</span>
           </div>
-          <div id="hotspot-clock" class="hotspot-area">
+          <div id="hotspot-clock" class="hotspot-area" onclick="window.game && window.game.handleHotspot('clock')">
             <span class="hotspot-badge">🕰️ 괘종시계</span>
           </div>
-          <div id="hotspot-frames" class="hotspot-area">
+          <div id="hotspot-frames" class="hotspot-area" onclick="window.game && window.game.handleHotspot('frames')">
             <span class="hotspot-badge">🖼️ 삐뚤어진 액자들</span>
           </div>
-          <div id="hotspot-safe" class="hotspot-area">
+          <div id="hotspot-safe" class="hotspot-area" onclick="window.game && window.game.handleHotspot('safe')">
             <span class="hotspot-badge">🔐 비밀 금고</span>
           </div>
-          <div id="hotspot-desk" class="hotspot-area">
+          <div id="hotspot-desk" class="hotspot-area" onclick="window.game && window.game.handleHotspot('desk')">
             <span class="hotspot-badge">🛋️ 앤틱 책상</span>
           </div>
-          <div id="hotspot-bookshelf" class="hotspot-area">
+          <div id="hotspot-bookshelf" class="hotspot-area" onclick="window.game && window.game.handleHotspot('bookshelf')">
             <span class="hotspot-badge">📚 마법의 책장</span>
           </div>
         </div>

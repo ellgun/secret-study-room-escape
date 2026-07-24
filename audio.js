@@ -12,16 +12,18 @@ class SoundEngine {
   }
 
   init() {
-    if (!this.ctx) {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (AudioCtx) {
-        this.ctx = new AudioCtx();
+    try {
+      if (!this.ctx) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) {
+          this.ctx = new AudioCtx();
+        }
       }
-    }
-    if (this.ctx && this.ctx.state === 'suspended') {
-      this.ctx.resume().catch(e => {
-        // 브라우저 자동 재생 정책에 따라 사용자 클릭 전에는 대기
-      });
+      if (this.ctx && this.ctx.state === 'suspended') {
+        this.ctx.resume().catch(() => {});
+      }
+    } catch (e) {
+      console.warn('Audio init warning:', e);
     }
   }
 
@@ -35,7 +37,6 @@ class SoundEngine {
     return this.enabled;
   }
 
-  // 1. 일반 클릭 음 (Click)
   playClick() {
     if (!this.enabled) return;
     this.init();
@@ -60,7 +61,6 @@ class SoundEngine {
     } catch (e) {}
   }
 
-  // 2. 아이템 획득 음 (Item Pick)
   playItemPick() {
     if (!this.enabled) return;
     this.init();
@@ -88,7 +88,6 @@ class SoundEngine {
     } catch (e) {}
   }
 
-  // 3. 퍼즐 성공 음 (Puzzle Success)
   playSuccess() {
     if (!this.enabled) return;
     this.init();
@@ -116,7 +115,6 @@ class SoundEngine {
     } catch (e) {}
   }
 
-  // 4. 오류/실패 음 (Error/Fail)
   playError() {
     if (!this.enabled) return;
     this.init();
@@ -142,7 +140,6 @@ class SoundEngine {
     } catch (e) {}
   }
 
-  // 5. 잠금 해제 / 열쇠 딸깍 음 (Unlock)
   playUnlock() {
     if (!this.enabled) return;
     this.init();
@@ -168,7 +165,6 @@ class SoundEngine {
     } catch (e) {}
   }
 
-  // 6. 앰비언트 미스터리 배경음 (Ambient BGM)
   startBgm() {
     if (!this.enabled || this.isBgmPlaying) return;
     this.init();
