@@ -89,14 +89,16 @@ class PuzzleManager {
       this.framesSolved = true;
       this.playSound('playSuccess');
 
+      // 보상 아이템: 3D 건전지 획득
       this.game.addItem({
         id: 'battery',
-        name: '건전지',
+        name: '3D 건전지',
         icon: '🔋',
-        desc: '소형 알칼라인 AA 건전지입니다. 전자 장치에 전원을 공급할 수 있습니다.'
+        image: 'battery.jpg',
+        desc: '황동과 구리 단자가 입체적으로 빛나는 3D 알칼라인 건전지입니다. 전자 장치에 전원을 공급할 수 있습니다.'
       });
 
-      alert('🎉 액자가 바르게 정렬되면서 뒤에서 [건전지 🔋]를 발견하고 인벤토리에 추가했습니다!');
+      alert('🎉 액자가 바르게 정렬되면서 뒤에서 [3D 건전지 🔋]를 발견하고 인벤토리에 추가했습니다!');
       this.game.closeModal();
     } else {
       this.playSound('playError');
@@ -125,14 +127,16 @@ class PuzzleManager {
         this.bookshelfSolved = true;
         this.playSound('playSuccess');
 
+        // 보상 아이템: 3D 작은 열쇠 획득
         this.game.addItem({
           id: 'small_key',
-          name: '작은 열쇠',
+          name: '3D 작은 열쇠',
           icon: '🗝️',
-          desc: '정교하게 깎인 작은 황동 열쇠입니다. 서재 가구의 서랍을 열 수 있을 것 같습니다.'
+          image: 'small_key.jpg',
+          desc: '정교한 음각 문양이 조각된 3D 황동 열쇠입니다. 서재 가구의 서랍을 열 수 있을 것 같습니다.'
         });
 
-        alert('🎉 비밀 장치가 작동하며 책장 뒤에서 [작은 열쇠 🗝️]가 튀어나왔습니다!');
+        alert('🎉 비밀 장치가 작동하며 책장 뒤에서 [3D 작은 열쇠 🗝️]가 튀어나왔습니다!');
         this.game.closeModal();
       } else {
         this.playSound('playError');
@@ -177,7 +181,7 @@ class PuzzleManager {
       id: 'uv_body',
       name: 'UV 라이트 본체',
       icon: '🔦',
-      desc: '자외선(UV) 전구가 장착된 손전등 본체입니다. 작동시키려면 건전지가 필요합니다.'
+      desc: '자외선(UV) 전구가 장착된 손전등 본체입니다. 작동시키려면 3D 건전지가 필요합니다.'
     });
 
     const drawer1Content = document.getElementById('drawer1-content');
