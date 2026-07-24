@@ -64,7 +64,7 @@ class GameController {
       }
     });
 
-    // 2. 핫스팟 클릭 이벤트
+    // 2. 3D 핫스팟 클릭 이벤트
     document.getElementById('hotspot-door').addEventListener('click', () => {
       window.soundEngine.playClick();
       this.openModal('modal-door');
@@ -207,10 +207,17 @@ class GameController {
       }
 
       if (item) {
-        slot.innerHTML = `
-          <span>${item.icon}</span>
-          <span class="slot-item-name">${item.name}</span>
-        `;
+        if (item.image) {
+          slot.innerHTML = `
+            <img class="slot-3d-img" src="${item.image}" alt="${item.name}">
+            <span class="slot-item-name">${item.name}</span>
+          `;
+        } else {
+          slot.innerHTML = `
+            <span>${item.icon}</span>
+            <span class="slot-item-name">${item.name}</span>
+          `;
+        }
         slot.onclick = () => this.selectSlot(index);
       } else {
         slot.onclick = () => this.selectSlot(null);
@@ -254,7 +261,7 @@ class GameController {
     const uvText = document.getElementById('uv-secret-text');
 
     if (active) {
-      uvOverlay.style.opacity = '0.7';
+      uvOverlay.style.opacity = '0.85';
       uvText.style.opacity = '1';
     } else {
       uvOverlay.style.opacity = '0';
@@ -269,7 +276,14 @@ class GameController {
 
     window.soundEngine.playClick();
     document.getElementById('inspect-title').innerText = item.name;
-    document.getElementById('inspect-icon').innerText = item.icon;
+
+    const iconContainer = document.getElementById('inspect-icon');
+    if (item.image) {
+      iconContainer.innerHTML = `<img class="inspect-3d-img" src="${item.image}" alt="${item.name}">`;
+    } else {
+      iconContainer.innerText = item.icon;
+    }
+
     document.getElementById('inspect-description').innerText = item.desc;
 
     this.openModal('modal-item-detail');
@@ -287,12 +301,13 @@ class GameController {
         window.soundEngine.playSuccess();
         this.addItem({
           id: 'uv_flashlight',
-          name: '작은 UV 손전등',
+          name: '3D UV 손전등',
           icon: '🔦✨',
-          desc: '건전지가 장착되어 자외선(UV) 빛을 발산하는 손전등입니다. 인벤토리에서 이 손전등을 클릭하여 선택하면 서재 안의 야광 암호를 비출 수 있습니다!'
+          image: 'uv_flashlight.jpg',
+          desc: '건전지가 장착되어 자외선(UV) 빛을 발산하는 3D 손전등입니다. 인벤토리에서 이 손전등을 클릭하여 선택하면 서재 안의 3D 야광 암호를 비출 수 있습니다!'
         });
 
-        alert('⚡ [건전지 🔋]와 [UV 라이트 본체 🔦]를 조합하여 [작은 UV 손전등 🔦✨]을 완성했습니다!');
+        alert('⚡ [건전지 🔋]와 [UV 라이트 본체 🔦]를 조합하여 [3D UV 손전등 🔦✨]을 완성했습니다!');
       } else {
         window.soundEngine.playError();
         alert('💡 이 아이템을 조합하려면 [건전지]와 [UV 라이트 본체]가 모두 필요합니다.');
@@ -330,8 +345,8 @@ class GameController {
     }
 
     if (this.hasItem('uv_flashlight') && !this.puzzleManager.safeSolved) {
-      hints.push('🔦✨ 인벤토리에서 [작은 UV 손전등]을 클릭하여 선택하면 어두운 서재에 4자리 야광 암호(7394)가 나타납니다!');
-      hints.push('🔐 다이얼 금고에 7394를 입력하면 마스터 키를 얻을 수 있습니다.');
+      hints.push('🔦✨ 인벤토리에서 [3D UV 손전등]을 클릭하여 선택하면 3D 서재에 4자리 야광 암호(7394)가 나타납니다!');
+      hints.push('🔐 다이얼 금고에 7394를 입력하면 3D 마스터 키를 얻을 수 있습니다.');
     }
 
     if (this.hasItem('master_key')) {

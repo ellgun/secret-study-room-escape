@@ -86,11 +86,6 @@ class PuzzleManager {
     if (this.frameAngles[1] === 0 && this.frameAngles[2] === 0 && this.frameAngles[3] === 0) {
       this.framesSolved = true;
       window.soundEngine.playSuccess();
-      
-      // 메인 SVG 방의 액자들도 바르게 세움
-      document.getElementById('svg-frame-1').setAttribute('transform', 'rotate(0 420 120)');
-      document.getElementById('svg-frame-2').setAttribute('transform', 'rotate(0 510 120)');
-      document.getElementById('svg-frame-3').setAttribute('transform', 'rotate(0 600 120)');
 
       // 보상 아이템: 건전지 획득
       this.game.addItem({
@@ -222,19 +217,16 @@ class PuzzleManager {
       this.safeSolved = true;
       window.soundEngine.playSuccess();
 
-      // 금고 LED 그린으로 변경
-      const safeLed = document.getElementById('safe-led');
-      if (safeLed) safeLed.setAttribute('fill', '#10b981');
-
-      // 보상 아이템: 마스터 키 획득
+      // 보상 아이템: 마스터 키 획득 (3D 이미지 연동)
       this.game.addItem({
         id: 'master_key',
-        name: '마스터 키',
+        name: '3D 마스터 키',
         icon: '🔑',
-        desc: '묵직한 앤틱 철제 마스터 키입니다. 서재의 최종 탈출 문을 열 수 있습니다.'
+        image: 'master_key.jpg',
+        desc: '묵직하고 화려하게 세공된 3D 앤틱 철제 마스터 키입니다. 서재의 최종 탈출 문을 열 수 있습니다.'
       });
 
-      alert('🎉 찰칵! 금고가 열리며 [마스터 키 🔑]를 발견했습니다!');
+      alert('🎉 찰칵! 금고가 열리며 [3D 마스터 키 🔑]를 발견했습니다!');
       this.game.closeModal();
     } else {
       window.soundEngine.playError();
@@ -252,10 +244,6 @@ class PuzzleManager {
       this.doorUnlocked = true;
       window.soundEngine.playSuccess();
       window.soundEngine.playUnlock();
-
-      // 문 모양 열림 스타일
-      const lockIcon = document.getElementById('door-lock-icon');
-      if (lockIcon) lockIcon.setAttribute('fill', '#10b981');
 
       this.game.closeModal();
       this.game.triggerVictory();
