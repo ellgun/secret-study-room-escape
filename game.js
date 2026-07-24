@@ -92,6 +92,18 @@ class GameController {
       });
     }
 
+    const btnToggleHotspots = document.getElementById('btn-toggle-hotspots');
+    if (btnToggleHotspots) {
+      btnToggleHotspots.addEventListener('click', () => {
+        const container = document.getElementById('room-canvas-container');
+        if (container) {
+          container.classList.toggle('show-hotspots');
+          const isShown = container.classList.contains('show-hotspots');
+          btnToggleHotspots.innerText = isShown ? '🔍 핫스팟 숨기기' : '🔍 핫스팟 표시';
+        }
+      });
+    }
+
     const btnHint = document.getElementById('btn-hint');
     if (btnHint) {
       btnHint.addEventListener('click', () => this.openHintModal());
@@ -358,7 +370,7 @@ class GameController {
         alert('⚡ [건전지 🔋]와 [UV 라이트 본체 🔦]를 조합하여 [3D UV 손전등 🔦✨]을 완성했습니다!');
       } else {
         this.playSound('playError');
-        alert('💡 이 아이템을 조합하려면 [건전지]와 [UV 라이트 본체]가 모두 필요합니다.');
+        alert('💡 이 아이템을 조합하려면 [3D 건전지]와 [UV 라이트 본체]가 모두 필요합니다.');
       }
     } else {
       this.playSound('playError');
@@ -377,17 +389,17 @@ class GameController {
     if (!this.puzzleManager.framesSolved) {
       hints.push('🖼️ 액자 퍼즐: 달(🌙) -> 태양(☀️) -> 별(⭐) 순서로 클릭하여 0도(직각)로 맞추세요.');
     } else if (!this.hasItem('battery') && !this.hasItem('uv_flashlight')) {
-      hints.push('🔋 액자 퍼즐을 완성하면 건전지를 얻을 수 있습니다.');
+      hints.push('🔋 액자 퍼즐을 완성하면 3D 건전지를 얻을 수 있습니다.');
     }
 
     if (!this.puzzleManager.bookshelfSolved) {
       hints.push('📚 책장 퍼즐: 책장 2단에서 무지개 색상 순서대로 (빨강 -> 파랑 -> 초록 -> 노랑) 책을 누르세요.');
     } else if (!this.puzzleManager.drawer1Unlocked) {
-      hints.push('🗝️ 책장 퍼즐에서 얻은 작은 열쇠로 책상 서랍 1을 열어보세요.');
+      hints.push('🗝️ 책장 퍼즐에서 얻은 3D 작은 열쇠로 책상 서랍 1을 열어보세요.');
     }
 
     if (this.hasItem('battery') && this.hasItem('uv_body')) {
-      hints.push('⚡ 인벤토리에서 건전지나 UV 라이트 본체를 선택한 후 [아이템 조합] 버튼을 누르세요.');
+      hints.push('⚡ 인벤토리에서 3D 건전지나 UV 라이트 본체를 선택한 후 [아이템 조합] 버튼을 누르세요.');
     }
 
     if (this.hasItem('uv_flashlight') && !this.puzzleManager.safeSolved) {

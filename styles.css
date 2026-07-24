@@ -198,53 +198,64 @@ body {
   opacity: 1;
 }
 
-/* 3D 가구에 정밀하게 배치된 핫스팟 레이아웃 */
+/* 3D 가구별 정밀 핫스팟 레이아웃 조정 */
 #hotspot-door {
-  top: 7%;
-  left: 1.5%;
-  width: 17.5%;
-  height: 80%;
-  border-radius: 20px 20px 0 0;
+  top: 12%;
+  left: 2%;
+  width: 17%;
+  height: 78%;
+  border-radius: 12px 12px 0 0;
 }
 
 #hotspot-clock {
-  top: 14%;
-  left: 21.5%;
-  width: 11%;
-  height: 25%;
-  border-radius: 50%;
+  top: 18%;
+  left: 20%;
+  width: 10%;
+  height: 42%;
+  border-radius: 14px;
 }
 
 #hotspot-frames {
-  top: 9%;
-  left: 35.5%;
-  width: 28.5%;
-  height: 18.5%;
-  border-radius: 12px;
-}
-
-#hotspot-safe {
-  top: 31.5%;
-  left: 50.5%;
-  width: 14.5%;
-  height: 20.5%;
+  top: 10%;
+  left: 33%;
+  width: 24%;
+  height: 22%;
   border-radius: 8px;
 }
 
 #hotspot-desk {
-  top: 53.5%;
-  left: 21%;
-  width: 46%;
-  height: 34%;
-  border-radius: 12px;
+  top: 46%;
+  left: 28%;
+  width: 42%;
+  height: 44%;
+  border-radius: 16px;
+}
+
+#hotspot-safe {
+  top: 34%;
+  left: 58%;
+  width: 13%;
+  height: 22%;
+  border-radius: 10px;
 }
 
 #hotspot-bookshelf {
-  top: 8%;
-  left: 68%;
-  width: 30.5%;
+  top: 10%;
+  left: 72%;
+  width: 26%;
   height: 80%;
   border-radius: 12px;
+}
+
+/* 핫스팟 상시 표시 모드 (토글 버튼 활성화 시) */
+.show-hotspots .hotspot-area {
+  background: rgba(251, 191, 36, 0.18) !important;
+  border: 2px dashed rgba(251, 191, 36, 0.8) !important;
+  box-shadow: 0 0 15px rgba(251, 191, 36, 0.4) !important;
+}
+
+.show-hotspots .hotspot-badge {
+  opacity: 1 !important;
 }
 
 /* UV 오버레이 */
