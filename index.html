@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>비밀의 서재 - 방탈출 게임 (The Secret Study)</title>
+  <meta name="description" content="미스터리한 앤틱 서재에서 단서를 찾아 탈출하는 2D 포인트 앤 클릭 방탈출 퍼즐 게임">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="game-container">
+    <!-- 상단 헤더 및 컨트롤러 -->
+    <header id="game-header">
+      <div class="header-title">
+        <span class="icon">🗝️</span>
+        <h1>비밀의 서재</h1>
+      </div>
+      <div class="header-status">
+        <div id="timer-display" class="status-badge">
+          <span class="badge-icon">⏱️</span>
+          <span id="time-text">00:00</span>
+        </div>
+        <button id="btn-hint" class="btn-icon" title="힌트 보기">💡 힌트</button>
+        <button id="btn-sound" class="btn-icon" title="소리 토글">🔊 소리 ON</button>
+        <button id="btn-restart" class="btn-icon" title="처음부터 다시">🔄 재시작</button>
+      </div>
+    </header>
+
+    <!-- 메인 방 화면 (Interactive Room) -->
+    <main id="room-viewport">
+      <!-- 서재 배경 SVG 그래픽 -->
+      <div id="room-canvas-container">
+        <svg id="room-svg" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <!-- 분위기 그래디언트 및 섀도우 -->
+            <radialGradient id="room-light" cx="50%" cy="30%" r="70%">
+              <stop offset="0%" stop-color="#fff4d0" stop-opacity="0.25"/>
+              <stop offset="50%" stop-color="#1c1626" stop-opacity="0.6"/>
+              <stop offset="100%" stop-color="#0a0810" stop-opacity="0.95"/>
+            </radialGradient>
+            
+            <linearGradient id="wall-grad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#1a1528"/>
+              <stop offset="100%" stop-color="#0d0a14"/>
+            </linearGradient>
+
+            <linearGradient id="floor-grad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#2a1d17"/>
+              <stop offset="100%" stop-color="#120c09"/>
+            </linearGradient>
+            
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
+
+          <!-- 벽면 및 바닥 -->
+          <rect width="1000" height="460" fill="url(#wall-grad)"/>
+          <!-- 몰딩 선 -->
+          <line x1="0" y1="460" x2="1000" y2="460" stroke="#3d2d24" stroke-width="6"/>
+          <rect y="460" width="1000" height="140" fill="url(#floor-grad)"/>
+          <!-- 마루 패턴 -->
+          <path d="M0 480 L1000 480 M0 510 L1000 510 M0 540 L1000 540 M0 570 L1000 570" stroke="#1f140e" stroke-width="1.5"/>
+
+          <!-- 1. 탈출 문 (Exit Door) -->
+          <g id="hotspot-door" class="hotspot-group" cursor="pointer">
+            <rect x="70" y="110" width="140" height="350" rx="8" fill="#2d1c14" stroke="#4a3022" stroke-width="5"/>
+            <rect x="85" y="130" width="110" height="140" rx="4" fill="#1e120c" stroke="#3a2318" stroke-width="3"/>
+            <rect x="85" y="290" width="110" height="150" rx="4" fill="#1e120c" stroke="#3a2318" stroke-width="3"/>
+            <!-- 손잡이 및 자물쇠 -->
+            <circle cx="180" cy="280" r="10" fill="#d4af37" stroke="#8a6d1a" stroke-width="2"/>
+            <rect id="door-lock-icon" x="176" y="274" width="8" height="12" rx="2" fill="#3a2a10"/>
+            <text x="140" y="95" fill="#c5a059" font-family="'Cinzel', serif" font-size="16" font-weight="bold" text-anchor="middle">EXIT DOOR</text>
+          </g>
+
+          <!-- 2. 벽면 시계 (Wall Clock) -->
+          <g id="hotspot-clock" class="hotspot-group" cursor="pointer">
+            <circle cx="280" cy="130" r="35" fill="#2b1a10" stroke="#d4af37" stroke-width="4"/>
+            <circle cx="280" cy="130" r="30" fill="#f4e8c1"/>
+            <!-- 시계 바늘 (9시 15분을 가리킴) -->
+            <line x1="280" y1="130" x2="262" y2="130" stroke="#222" stroke-width="3" stroke-linecap="round"/>
+            <line x1="280" y1="130" x2="280" y2="110" stroke="#900" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="280" cy="130" r="3" fill="#111"/>
+            <text x="280" y="80" fill="#a89260" font-family="sans-serif" font-size="12" text-anchor="middle">괘종시계</text>
+          </g>
+
+          <!-- 3. 벽면 액자 3개 (Frames) -->
+          <g id="hotspot-frames" class="hotspot-group" cursor="pointer">
+            <!-- Frame 1 -->
+            <g id="svg-frame-1" transform="rotate(-15 420 120)">
+              <rect x="390" y="90" width="60" height="60" fill="#3a2510" stroke="#b8860b" stroke-width="4"/>
+              <rect x="398" y="98" width="44" height="44" fill="#1a202c"/>
+              <text x="420" y="125" fill="#e2e8f0" font-size="20" text-anchor="middle">🌙</text>
+            </g>
+            <!-- Frame 2 -->
+            <g id="svg-frame-2" transform="rotate(25 510 120)">
+              <rect x="480" y="90" width="60" height="60" fill="#3a2510" stroke="#b8860b" stroke-width="4"/>
+              <rect x="488" y="98" width="44" height="44" fill="#2c1a20"/>
+              <text x="510" y="125" fill="#fbbf24" font-size="20" text-anchor="middle">☀️</text>
+            </g>
+            <!-- Frame 3 -->
+            <g id="svg-frame-3" transform="rotate(-30 600 120)">
+              <rect x="570" y="90" width="60" height="60" fill="#3a2510" stroke="#b8860b" stroke-width="4"/>
+              <rect x="578" y="98" width="44" height="44" fill="#1a2e1a"/>
+              <text x="600" y="125" fill="#60a5fa" font-size="20" text-anchor="middle">⭐</text>
+            </g>
+            <text x="510" y="70" fill="#a89260" font-family="sans-serif" font-size="12" text-anchor="middle">삐뚤어진 액자들</text>
+          </g>
+
+          <!-- 4. 서재 책장 (Bookshelf) -->
+          <g id="hotspot-bookshelf" class="hotspot-group" cursor="pointer">
+            <rect x="720" y="100" width="220" height="360" rx="4" fill="#25160c" stroke="#4a2e1b" stroke-width="6"/>
+            <!-- 선반 선들 -->
+            <line x1="720" y1="190" x2="940" y2="190" stroke="#4a2e1b" stroke-width="5"/>
+            <line x1="720" y1="280" x2="940" y2="280" stroke="#4a2e1b" stroke-width="5"/>
+            <line x1="720" y1="370" x2="940" y2="370" stroke="#4a2e1b" stroke-width="5"/>
+            
+            <!-- 알록달록 책들 -->
+            <!-- 1단 책들 -->
+            <rect x="735" y="120" width="18" height="65" fill="#991b1b" rx="2"/>
+            <rect x="756" y="115" width="22" height="70" fill="#1e3a8a" rx="2"/>
+            <rect x="781" y="125" width="16" height="60" fill="#065f46" rx="2"/>
+            <rect x="800" y="118" width="25" height="67" fill="#854d0e" rx="2"/>
+            <rect x="830" y="122" width="20" height="63" fill="#581c87" rx="2"/>
+
+            <!-- 2단 책들 (퍼즐용 특수 책들) -->
+            <rect id="book-red" x="740" y="205" width="24" height="70" fill="#ef4444" stroke="#991b1b" stroke-width="2" rx="2"/>
+            <rect id="book-blue" x="770" y="200" width="24" height="75" fill="#3b82f6" stroke="#1d4ed8" stroke-width="2" rx="2"/>
+            <rect id="book-green" x="800" y="208" width="24" height="67" fill="#10b981" stroke="#047857" stroke-width="2" rx="2"/>
+            <rect id="book-yellow" x="830" y="202" width="24" height="73" fill="#f59e0b" stroke="#b45309" stroke-width="2" rx="2"/>
+            <rect id="book-purple" x="860" y="206" width="24" height="69" fill="#a855f7" stroke="#6b21a8" stroke-width="2" rx="2"/>
+
+            <text x="830" y="85" fill="#a89260" font-family="sans-serif" font-size="12" text-anchor="middle">오래된 책장</text>
+          </g>
+
+          <!-- 5. 앤틱 책상 (Desk) -->
+          <g id="hotspot-desk" class="hotspot-group" cursor="pointer">
+            <!-- 책상 상판 -->
+            <polygon points="260,340 680,340 700,380 240,380" fill="#3d2516" stroke="#5c3a24" stroke-width="4"/>
+            <!-- 책상 다리 및 서랍장 -->
+            <rect x="270" y="380" width="400" height="110" fill="#29180e" stroke="#422717" stroke-width="3"/>
+            <!-- 서랍 1 (왼쪽) -->
+            <rect x="290" y="395" width="160" height="75" fill="#1e1109" stroke="#4a2e1b" stroke-width="3"/>
+            <circle cx="370" cy="432" r="7" fill="#d4af37"/>
+            <text x="370" y="420" fill="#888" font-size="10" text-anchor="middle">서랍 1 (잠김)</text>
+            
+            <!-- 서랍 2 (오른쪽) -->
+            <rect x="490" y="395" width="160" height="75" fill="#1e1109" stroke="#4a2e1b" stroke-width="3"/>
+            <circle cx="570" cy="432" r="7" fill="#d4af37"/>
+            <text x="570" y="420" fill="#aaa" font-size="10" text-anchor="middle">서랍 2</text>
+
+            <!-- 책상 위 소품: 탁상 달력, 메모지 -->
+            <path d="M310 335 L340 310 L370 335 Z" fill="#f4e8c1" stroke="#8a6d1a"/>
+            <rect x="400" y="325" width="50" height="15" fill="#fff" opacity="0.8" transform="rotate(-5 400 325)"/>
+
+            <text x="470" y="365" fill="#ffd700" font-family="sans-serif" font-size="13" font-weight="bold" text-anchor="middle">앤틱 책상 (클릭)</text>
+          </g>
+
+          <!-- 6. 4자리 다이얼 금고 (Safe) -->
+          <g id="hotspot-safe" class="hotspot-group" cursor="pointer">
+            <rect x="520" y="230" width="90" height="90" rx="6" fill="#1f2937" stroke="#4b5563" stroke-width="4"/>
+            <circle cx="565" cy="275" r="28" fill="#111827" stroke="#d4af37" stroke-width="3"/>
+            <!-- 다이얼 손잡이 -->
+            <circle cx="565" cy="275" r="10" fill="#d4af37"/>
+            <line x1="565" y1="275" x2="565" y2="250" stroke="#ef4444" stroke-width="3"/>
+            <!-- 금고 LED -->
+            <circle id="safe-led" cx="595" cy="245" r="4" fill="#ef4444"/>
+            <text x="565" y="218" fill="#a89260" font-family="sans-serif" font-size="11" text-anchor="middle">비밀 금고</text>
+          </g>
+
+          <!-- 전체 어두운 조명 뷰포트 레이어 -->
+          <rect width="1000" height="600" fill="url(#room-light)" pointer-events="none"/>
+
+          <!-- UV 라이트 효과 레이어 (기본 hidden) -->
+          <rect id="uv-overlay" width="1000" height="600" fill="#3b0764" opacity="0" pointer-events="none" style="transition: opacity 0.5s ease; mix-blend-mode: color-dodge;"/>
+          
+          <!-- UV 손전등 비출 때 보이는 야광 야광 암호 문양 -->
+          <g id="uv-secret-text" opacity="0" style="transition: opacity 0.5s ease;">
+            <text x="425" y="320" fill="#a7f3d0" font-family="'Cinzel', serif" font-size="16" font-weight="bold" filter="url(#glow)">[ UV SECRET: 7 3 9 4 ]</text>
+          </g>
+        </svg>
+      </div>
+    </main>
+
+    <!-- 하단 인벤토리 슬롯 영역 -->
+    <footer id="inventory-bar">
+      <div class="inventory-header">
+        <h2>INVENTORY (획득한 아이템)</h2>
+        <div class="inventory-actions">
+          <button id="btn-inspect" class="btn-action" disabled>🔍 상세보기</button>
+          <button id="btn-combine" class="btn-action" disabled>⚡ 아이템 조합</button>
+        </div>
+      </div>
+      <div id="inventory-slots" class="slots-container">
+        <!-- 8개의 인벤토리 슬롯 -->
+        <div class="slot" data-index="0"></div>
+        <div class="slot" data-index="1"></div>
+        <div class="slot" data-index="2"></div>
+        <div class="slot" data-index="3"></div>
+        <div class="slot" data-index="4"></div>
+        <div class="slot" data-index="5"></div>
+        <div class="slot" data-index="6"></div>
+        <div class="slot" data-index="7"></div>
+      </div>
+    </footer>
+
+    <!-- 모달 오버레이들 (Modals) -->
+    <div id="modal-overlay" class="modal-backdrop hidden">
+      <!-- 1. 액자 퍼즐 모달 -->
+      <div id="modal-frames" class="modal-content puzzle-modal hidden">
+        <button class="modal-close">&times;</button>
+        <h3>🖼️ 삐뚤어진 액자 정렬 퍼즐</h3>
+        <p class="puzzle-desc">벽에 새겨진 문구: <em>"달(🌙) -> 태양(☀️) -> 별(⭐) 순서로 바르게 세우라"</em></p>
+        <p class="sub-hint">각 액자를 클릭하여 0도(직각)로 바르게 맞추세요!</p>
+        <div class="frames-interactive-container">
+          <div class="frame-item" id="interactive-frame-1">
+            <div class="frame-box rotate-m15">🌙</div>
+            <span class="frame-status">15° 기울어짐</span>
+          </div>
+          <div class="frame-item" id="interactive-frame-2">
+            <div class="frame-box rotate-p25">☀️</div>
+            <span class="frame-status">25° 기울어짐</span>
+          </div>
+          <div class="frame-item" id="interactive-frame-3">
+            <div class="frame-box rotate-m30">⭐</div>
+            <span class="frame-status">30° 기울어짐</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="btn-check-frames" class="btn-primary">정렬 확인</button>
+        </div>
+      </div>
+
+      <!-- 2. 책장 퍼즐 모달 -->
+      <div id="modal-bookshelf" class="modal-content puzzle-modal hidden">
+        <button class="modal-close">&times;</button>
+        <h3>📚 색상 책 순서 퍼즐</h3>
+        <p class="puzzle-desc">책장 옆 구석의 메모: <em>"무지개의 시련 (빨 -> 파 -> 초 -> 노)"</em></p>
+        <div class="books-interactive-container">
+          <button class="color-book book-r" data-color="red">빨강</button>
+          <button class="color-book book-b" data-color="blue">파랑</button>
+          <button class="color-book book-g" data-color="green">초록</button>
+          <button class="color-book book-y" data-color="yellow">노랑</button>
+          <button class="color-book book-p" data-color="purple">보라</button>
+        </div>
+        <div id="book-sequence-display" class="sequence-box">현재 입력: <span id="seq-text">없음</span></div>
+        <div class="modal-footer">
+          <button id="btn-reset-books" class="btn-secondary">입력 초기화</button>
+        </div>
+      </div>
+
+      <!-- 3. 책상 서랍 및 메모 모달 -->
+      <div id="modal-desk" class="modal-content puzzle-modal hidden">
+        <button class="modal-close">&times;</button>
+        <h3>🛋️ 앤틱 책상 서랍</h3>
+        <div class="desk-view">
+          <div class="desk-drawer-box">
+            <h4>서랍 1 (열쇠 필요)</h4>
+            <button id="btn-unlock-drawer1" class="btn-primary">작은 열쇠로 서랍 열기</button>
+            <div id="drawer1-content" class="drawer-inner hidden">
+              <p>서랍 안에서 <strong>[UV 라이트 본체]</strong>를 발견했습니다!</p>
+              <button id="btn-take-uvlight" class="btn-success">UV 라이트 획득</button>
+            </div>
+          </div>
+          <hr>
+          <div class="desk-drawer-box">
+            <h4>서랍 2 (열려있음)</h4>
+            <p class="note-paper">📜 낡은 연구 노트: "UV 전구가 내장된 라이트는 건전지를 끼워야 켜진다. 책상 표면에 숨겨진 글씨는 UV 빛을 받으면 선명해진다."</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. 다이얼 금고 모달 -->
+      <div id="modal-safe" class="modal-content puzzle-modal hidden">
+        <button class="modal-close">&times;</button>
+        <h3>🔐 비밀 다이얼 금고</h3>
+        <p class="puzzle-desc">4자리 암호를 입력하세요.</p>
+        <div class="passcode-display">
+          <span class="code-digit" id="digit-0">0</span>
+          <span class="code-digit" id="digit-1">0</span>
+          <span class="code-digit" id="digit-2">0</span>
+          <span class="code-digit" id="digit-3">0</span>
+        </div>
+        <div class="keypad-grid">
+          <button class="key-btn" data-key="1">1</button>
+          <button class="key-btn" data-key="2">2</button>
+          <button class="key-btn" data-key="3">3</button>
+          <button class="key-btn" data-key="4">4</button>
+          <button class="key-btn" data-key="5">5</button>
+          <button class="key-btn" data-key="6">6</button>
+          <button class="key-btn" data-key="7">7</button>
+          <button class="key-btn" data-key="8">8</button>
+          <button class="key-btn" data-key="9">9</button>
+          <button class="key-btn btn-danger" data-key="C">C</button>
+          <button class="key-btn" data-key="0">0</button>
+          <button class="key-btn btn-success" data-key="OK">확인</button>
+        </div>
+      </div>
+
+      <!-- 5. 최종 문 모달 -->
+      <div id="modal-door" class="modal-content puzzle-modal hidden">
+        <button class="modal-close">&times;</button>
+        <h3>🚪 굳게 잠긴 서재 탈출문</h3>
+        <p class="puzzle-desc">이 문을 열 수 있는 단 하나의 <strong>마스터 키</strong>가 필요합니다.</p>
+        <div id="door-action-area">
+          <button id="btn-use-masterkey" class="btn-primary btn-lg">🔑 마스터 키를 꽂고 문 열기</button>
+        </div>
+      </div>
+
+      <!-- 6. 아이템 상세보기 모달 -->
+      <div id="modal-item-detail" class="modal-content inspect-modal hidden">
+        <button class="modal-close">&times;</button>
+        <h3 id="inspect-title">아이템 이름</h3>
+        <div id="inspect-icon" class="inspect-icon-box">🎒</div>
+        <p id="inspect-description" class="inspect-desc">아이템 설명입니다.</p>
+      </div>
+
+      <!-- 7. 힌트 모달 -->
+      <div id="modal-hint" class="modal-content hint-modal hidden">
+        <button class="modal-close">&times;</button>
+        <h3>💡 서재 탈출 힌트</h3>
+        <ul id="hint-list" class="hint-list">
+          <!-- 힌트 항목들이 동적으로 추가됨 -->
+        </ul>
+      </div>
+
+      <!-- 8. 게임 클리어 / 탈출 성공 모달 -->
+      <div id="modal-clear" class="modal-content clear-modal hidden">
+        <h2 class="clear-title">🎉 ESCAPE SUCCESS! 🎉</h2>
+        <p class="clear-subtitle">축하합니다! 당신은 비밀의 서재를 무사히 탈출했습니다.</p>
+        <div class="clear-stats">
+          <div class="stat-card">
+            <span class="stat-label">소요 시간</span>
+            <span id="final-time" class="stat-value">00:00</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">획득 칭호</span>
+            <span id="final-rank" class="stat-value">전설의 탈출가</span>
+          </div>
+        </div>
+        <button id="btn-play-again" class="btn-success btn-lg">🎮 다시 도전하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 스크립트 연결 -->
+  <script src="audio.js"></script>
+  <script src="puzzles.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
